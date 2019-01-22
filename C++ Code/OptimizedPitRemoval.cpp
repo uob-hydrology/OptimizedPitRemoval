@@ -15,9 +15,10 @@
 #include <sstream> //Used for converting numbers and strings
 #include <stdlib.h> //Used for converting numbers and strings
 #include <string>
+#include <cstring>
 #include <queue>
 using namespace std;
-using namespace System;
+//using namespace System;
 using std::vector;
 #include <map> //Used to create cost functions
 
