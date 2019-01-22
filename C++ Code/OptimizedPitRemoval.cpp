@@ -71,12 +71,12 @@ void GetAsciiHeader(char *demfile);
 void GetAsciiDoubleVector(char *inputpath,vector<double>& Vect);
 void SaveAscii(char *outputpath, vector<double> Vect);
 
-bool IsBorder(int ID);
-bool NeighborNoValue(int ID);
-void GetNeighbors(int ID);
-void AddToMainQueue(int ID, bool ConfirmDescend);
-void GetDryNeighbors(int ID);
-void SetFlowDirection(int FromID, int ToID);
+bool IsBorder(size_t ID);
+bool NeighborNoValue(size_t ID);
+void GetNeighbors(size_t ID);
+void AddToMainQueue(size_t ID, bool ConfirmDescend);
+void GetDryNeighbors(size_t ID);
+void SetFlowDirection(size_t FromID, size_t ToID);
 
 double GetIdealFillLevel(double CrestElev);
 
@@ -87,7 +87,7 @@ void GetDepressionExtent(int PitID, double CrestElev);
 double GetCrestElevation(int PitID);
 void CreateFillFunction(int PitID, double CrestElev);
 void CreateCutFunction(int PitID, double CrestElev);
-bool CheckCell(int ID, int Direction, int& CurNeighborID, double CrestElev);
+bool CheckCell(size_t ID, int Direction, int& CurNeighborID, double CrestElev);
 bool IsLocalMinimum(int CurID);
 
 // ====== GLOBAL VARIABLES  ================================
@@ -114,11 +114,11 @@ priority_queue<point, vector<point>, ComparePoint> FillStepQueue;
 
 //Common variables which would otherwise be passed back and forth frequently
 double PitElev;
-int numCols, numRows; // numCols/numRows are 1-based grid size from ASCII definition
-int Size;
+size_t numCols, numRows; // numCols/numRows are 1-based grid size from ASCII definition
+size_t Size;
 double Xll, Yll, cell_size, no_data;
 enum ModeType {CUT, BAL, MIN_COST, MIN_CELL};
-int Mode;
+ModeType Mode;
 double step_size;
 char demfile[MAXLN], newfile[MAXLN], pitfile[MAXLN]; //MAXLN defined in commonLib.h as 4096
 bool SavePits;
@@ -560,7 +560,7 @@ void CreateFillFunction(int PitID, double CrestElev)
 	FillFunction[CrestElev] = 0; //Make sure an entry for the Crest is added
 
 	//Calculate Cost
-	int i;
+	size_t i;
 	for (i=0;i<Depression.size();i++)
 	{
 		CurID = Depression.at(i);
@@ -653,7 +653,7 @@ double GetIdealFillLevel(double CrestElev)
 	return FillLevel;
 }
 
-bool IsBorder(int ID)
+bool IsBorder(size_t ID)
 {
 	//Tests if cell is on the outer edge of the grid, and thus is an outlet
 	bool border = 0;
@@ -671,7 +671,7 @@ bool IsBorder(int ID)
 
 	return border;
 }
-bool NeighborNoValue(int ID)
+bool NeighborNoValue(size_t ID)
 {
 	//Tests if cell is next to a cell with no_data, and thus is an outlet
 	bool novalue = 0;
@@ -695,7 +695,7 @@ bool NeighborNoValue(int ID)
 	}
 	return novalue;
 }
-void AddToMainQueue(int ID, bool ConfirmDescend)
+void AddToMainQueue(size_t ID, bool ConfirmDescend)
 {
 	//Adds cell to main queue. Input ConfirmDescend = true if there is a known continuously descending path to an outlet.
 	//Cells are added to Main Queue at the moment they become flooded. 
@@ -749,7 +749,7 @@ bool IsLocalMinimum(int CurID)
 		if (IsMinimum==true) IsPit.at(CurID) = 1;
 	return IsMinimum;
 }
-void GetNeighbors(int ID)
+void GetNeighbors(size_t ID)
 {
 	//Neighbors is a 0-7 vector, defined clockwise from Northwest
 	//Returns the ID value for the eight neighbors, with -1 for cells off the grid
@@ -810,7 +810,7 @@ void GetNeighbors(int ID)
 	else 
 		Neighbors.at(7)=ID-1;
 }
-void GetDryNeighbors(int ID)
+void GetDryNeighbors(size_t ID)
 {
 	//Adds all neighbors which have not yet been flooded to NeighborQueue.
 
@@ -832,7 +832,7 @@ void GetDryNeighbors(int ID)
 	}
 }
 
-void SetFlowDirection(int FromID, int ToID)
+void SetFlowDirection(size_t FromID, size_t ToID)
 {
 	 //Flow direction is FROM current cell TO cell which caused it to flood, clockwise from East (1,2,4,8,16,32,64,128)
      //If two cells are not neighbors or if a neighbor is off the grid/ has no_data, direction set to 0.
@@ -900,7 +900,7 @@ void FillToElevation(int PitID, double FillElev)
 		
 	if ((Terrain.at(PitID) < FillElev) && (Terrain.at(PitID) != no_data)) Terrain.at(PitID) = FillElev;
 
-	int i;
+	size_t i;
 	for (i=0;i<Depression.size();i++)
 	{
 		CurID = Depression.at(i);
@@ -941,7 +941,7 @@ void CutToElevation(int PitID)
 }
 
 
-bool CheckCell(int ID, int Direction, int& CurNeighborID, double CrestElev)
+bool CheckCell(size_t ID, int Direction, int& CurNeighborID, double CrestElev)
 {
 	bool Check = false;
 	int Size = Terrain.size();
@@ -1105,7 +1105,7 @@ void SaveAscii(char *outputpath, vector<double> Vect)
 
 	//Write data
 	size_t i=0;
-	int curcol=1;
+	size_t curcol=1;
 	while(i<Size)
 	{
 		for(curcol=1;curcol<numCols+1;curcol++)
